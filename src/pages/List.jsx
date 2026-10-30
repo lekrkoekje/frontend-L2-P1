@@ -2,39 +2,41 @@ import { useEffect, useState } from 'react';
 
 import PokemonCard from '../components/PokemonCard';
 
-// De namen van alle 18 Pokemon types.
 const typeNames = [
   'normal', 'fire', 'water', 'grass', 'electric', 'ice', 'fighting', 'poison', 'ground',
   'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy',
 ];
 
-// De pagina met alle Pokemon en een zoekbalk.
 function List() {
-  // Alle Pokemon, eerst is de lijst nog leeg.
   const [pokemonList, setPokemonList] = useState([]);
 
-  // De tekst die je in de zoekbalk typt.
   const [search, setSearch] = useState('');
 
-  // Haalt alle Pokemon op als de pagina opent, het nummer halen we uit de url (het 7e stukje).
   useEffect(() => {
     async function fetchPokemon() {
       const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=-1');
       const data = await response.json();
 
-      const pokemon = data.results.map((item) => ({ id: Number(item.url.split('/')[6]), name: item.name, types: [] }));
+      const pokemon = data.results.map((item) => {
+        const pokemonId = Number(item.url.split('/')[6]);
 
-      // Haalt elk type op en zet dat type bij al zijn Pokemon, zo zijn het maar 18 fetches.
+        return {
+          id: pokemonId,
+          name: item.name,
+          types: [],
+        };
+      });
+
       for (const typeName of typeNames) {
         const typeResponse = await fetch(`https://pokeapi.co/api/v2/type/${typeName}`);
         const typeData = await typeResponse.json();
 
         for (const item of typeData.pokemon) {
           const pokemonId = Number(item.pokemon.url.split('/')[6]);
-          const found = pokemon.find((p) => p.id === pokemonId);
+          const matchingPokemon = pokemon.find((pokemon) => pokemon.id === pokemonId);
 
-          if (found) {
-            found.types[item.slot - 1] = typeName;
+          if (matchingPokemon) {
+            matchingPokemon.types[item.slot - 1] = typeName;
           }
         }
       }
@@ -45,10 +47,13 @@ function List() {
     fetchPokemon();
   }, []);
 
-  // Alleen de Pokemon waarvan de naam of het nummer past bij de zoektekst.
-  const shownPokemon = pokemonList.filter((pokemon) => pokemon.name.includes(search.toLowerCase()) || String(pokemon.id) === search);
+  const shownPokemon = pokemonList.filter((pokemon) => {
+    const matchesName = pokemon.name.includes(search.toLowerCase());
+    const matchesNumber = String(pokemon.id) === search;
 
-  // Bovenaan de titel en de zoekbalk, daaronder alle kaartjes.
+    return matchesName || matchesNumber;
+  });
+
   return (
     <section>
       <div className="d-flex justify-content-between align-items-center mb-3">

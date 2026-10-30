@@ -1,13 +1,12 @@
 import { Link } from 'react-router-dom';
 
-// Dit plaatje laten we zien als een Pokemon geen eigen plaatje heeft.
 export const unknownImage = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png';
 
-// Een kaartje van een Pokemon, als je erop klikt ga je naar de detailpagina.
-// children is een extra knop die je in het kaartje kan zetten, zoals een kruisje.
 function PokemonCard({ id, name, image, types, children }) {
-  // loading="lazy" laadt het plaatje pas als je ernaartoe scrolt, oude favorieten hebben soms nog geen types.
-  // Bestaat het plaatje niet, dan laat onError een vraagteken zien.
+  function handleImageError(event) {
+    event.target.src = unknownImage;
+  }
+
   return (
     <div className="card pokemon-card h-100 text-center border-0 shadow-sm">
       <Link className="card-body text-decoration-none text-dark" to={`/detail/${id}`}>
@@ -16,7 +15,7 @@ function PokemonCard({ id, name, image, types, children }) {
           src={image || unknownImage}
           alt={name}
           loading="lazy"
-          onError={(event) => (event.target.src = unknownImage)}
+          onError={handleImageError}
         />
         <p className="small text-muted m-0">#{id}</p>
         <p className="fw-bold text-capitalize mb-1">{name}</p>

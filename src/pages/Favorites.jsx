@@ -3,15 +3,17 @@ import { Link } from 'react-router-dom';
 
 import PokemonCard from '../components/PokemonCard';
 
-// De pagina met al je favoriete Pokemon.
 function Favorites({ favorites, removeFavorite }) {
-  // De tekst die je in de zoekbalk typt.
+
   const [search, setSearch] = useState('');
 
-  // Alleen de favorieten waarvan de naam of het nummer past bij de zoektekst.
-  const shownFavorites = favorites.filter((pokemon) => pokemon.name.includes(search.toLowerCase()) || String(pokemon.id) === search);
+  const shownFavorites = favorites.filter((pokemon) => {
+    const matchesName = pokemon.name.includes(search.toLowerCase());
+    const matchesNumber = String(pokemon.id) === search;
 
-  // Zonder favorieten zie je een knop naar de Pokemon, anders een zoekbalk en de kaartjes met een kruisje.
+    return matchesName || matchesNumber;
+  });
+
   return (
     <section>
       <div className="d-flex justify-content-between align-items-center mb-3">

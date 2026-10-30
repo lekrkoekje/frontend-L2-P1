@@ -3,7 +3,6 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { unknownImage } from '../components/PokemonCard';
 
-// De Engelse namen van de stats met de Nederlandse naam die we laten zien.
 const statNames = {
   hp: 'HP',
   attack: 'Aanval',
@@ -13,30 +12,22 @@ const statNames = {
   speed: 'Snelheid',
 };
 
-// De pagina met alle info over 1 Pokemon, hier kan je hem favoriet maken of in een team zetten.
 function Detail({ favorites, addFavorite, removeFavorite, teams, addToTeam }) {
-  // Het nummer van de Pokemon uit de url, bij /detail/25 is id dus 25.
+
   const { id } = useParams();
 
-  // Hiermee kunnen we terug naar de vorige pagina.
   const navigate = useNavigate();
 
-  // De opgehaalde Pokemon, eerst nog leeg (null).
   const [pokemon, setPokemon] = useState(null);
 
-  // Extra info zoals de beschrijving, de generatie en de habitat.
   const [species, setSpecies] = useState(null);
 
-  // De Pokemon in de evolutielijn, bijvoorbeeld Bulbasaur, Ivysaur en Venusaur.
   const [evolutions, setEvolutions] = useState([]);
 
-  // Het team dat je in de keuzelijst hebt gekozen.
   const [teamId, setTeamId] = useState('');
 
-  // Een melding zoals "Dit team is vol", met een kleur (success of danger).
   const [message, setMessage] = useState(null);
 
-  // Haalt na elkaar de Pokemon, de soort en de evolutielijn op, en opnieuw als het nummer in de url verandert.
   useEffect(() => {
     async function fetchPokemon() {
       setPokemon(null);
@@ -51,13 +42,16 @@ function Detail({ favorites, addFavorite, removeFavorite, teams, addToTeam }) {
       const evolutionResponse = await fetch(speciesData.evolution_chain.url);
       const evolutionData = await evolutionResponse.json();
 
-      // Loopt van de eerste Pokemon steeds een evolutie verder tot er niks meer komt.
-      // Het nummer halen we uit de url, bij .../pokemon-species/1/ is dat het 7e stukje.
       const evolutionList = [];
       let step = evolutionData.chain;
 
       while (step) {
-        evolutionList.push({ id: step.species.url.split('/')[6], name: step.species.name });
+        const evolution = {
+          id: step.species.url.split('/')[6],
+          name: step.species.name,
+        };
+
+        evolutionList.push(evolution);
         step = step.evolves_to[0];
       }
 
@@ -69,51 +63,58 @@ function Detail({ favorites, addFavorite, removeFavorite, teams, addToTeam }) {
     fetchPokemon();
   }, [id]);
 
-  // Zolang de Pokemon nog niet binnen is zie je een laadtekst.
   if (!pokemon || !species) {
     return <p className="text-muted">Pokemon laden...</p>;
   }
 
-  // Een kleine versie van de Pokemon die we bewaren in de favorieten en teams.
-  const smallPokemon = {
+  const savedPokemon = {
     id: pokemon.id,
     name: pokemon.name,
     image: pokemon.sprites.front_default || unknownImage,
     types: pokemon.types.map((type) => type.type.name),
   };
 
-  // Kijkt of deze Pokemon al in je favorieten staat (true of false).
   const isFavorite = favorites.some((item) => item.id === pokemon.id);
 
-  // Pakt de Engelse beschrijving.
   const description = species.flavor_text_entries.find((entry) => entry.language.name === 'en');
+  let descriptionText = '';
 
-  // Voegt de Pokemon toe aan het gekozen team als dat mag, anders zie je een foutmelding.
-  function handleAdd() {
+  if (description) {
+    descriptionText = description.flavor_text.replaceAll('\n', ' ').replaceAll('\f', ' ');
+  }
+
+  function handleAddToTeam() {
     const team = teams.find((item) => item.id === Number(teamId));
 
     if (!team) {
       setMessage({ type: 'danger', text: 'Kies eerst een team.' });
-    } else if (team.pokemon.length >= 6) {
-      setMessage({ type: 'danger', text: 'Dit team is vol, er mogen maximaal 6 Pokemon in.' });
-    } else if (team.pokemon.some((item) => item.id === pokemon.id)) {
-      setMessage({ type: 'danger', text: 'Deze Pokemon zit al in dit team.' });
-    } else {
-      addToTeam(team.id, smallPokemon);
-      setMessage({ type: 'success', text: `${pokemon.name} zit nu in ${team.name}!` });
+      return;
     }
+
+    if (team.pokemon.length >= 6) {
+      setMessage({ type: 'danger', text: 'Dit team is vol, er mogen maximaal 6 Pokemon in.' });
+      return;
+    }
+
+    const alreadyInTeam = team.pokemon.some((item) => item.id === pokemon.id);
+
+    if (alreadyInTeam) {
+      setMessage({ type: 'danger', text: 'Deze Pokemon zit al in dit team.' });
+      return;
+    }
+
+    addToTeam(team.id, savedPokemon);
+    setMessage({ type: 'success', text: `${pokemon.name} zit nu in ${team.name}!` });
   }
 
-  // Is de Pokemon al favoriet dan halen we hem weg, anders voegen we hem toe.
   function handleFavorite() {
     if (isFavorite) {
       removeFavorite(pokemon.id);
     } else {
-      addFavorite(smallPokemon);
+      addFavorite(savedPokemon);
     }
   }
 
-  // Bovenaan een grote kaart met de Pokemon en de knoppen, daaronder 4 kaarten met meer info.
   return (
     <section>
       <button className="btn btn-outline-secondary mb-3" type="button" onClick={() => navigate(-1)}>
@@ -124,7 +125,7 @@ function Detail({ favorites, addFavorite, removeFavorite, teams, addToTeam }) {
         <div className="card-body p-4">
           <div className="row align-items-center">
             <div className="col-md-5 text-center bg-light rounded mb-3 mb-md-0">
-              <img className="detail-image" src={smallPokemon.image} alt={pokemon.name} />
+              <img className="detail-image" src={savedPokemon.image} alt={pokemon.name} />
             </div>
 
             <div className="col-md-7 ps-md-4">
@@ -144,8 +145,7 @@ function Detail({ favorites, addFavorite, removeFavorite, teams, addToTeam }) {
                 {species.is_mythical && <span className="badge bg-info text-dark fs-6 me-1">Mythisch</span>}
               </div>
 
-              {/* De rare enters (\n en \f) in de tekst vervangen we door spaties. */}
-              {description && <p>{description.flavor_text.replaceAll('\n', ' ').replaceAll('\f', ' ')}</p>}
+              {description && <p>{descriptionText}</p>}
 
               <button
                 className={isFavorite ? 'btn btn-danger w-100 mb-3' : 'btn btn-outline-danger w-100 mb-3'}
@@ -173,7 +173,7 @@ function Detail({ favorites, addFavorite, removeFavorite, teams, addToTeam }) {
                     ))}
                   </select>
 
-                  <button className="btn btn-primary" type="button" onClick={handleAdd}>
+                  <button className="btn btn-primary" type="button" onClick={handleAddToTeam}>
                     Toevoegen aan team
                   </button>
                 </div>
@@ -192,7 +192,6 @@ function Detail({ favorites, addFavorite, removeFavorite, teams, addToTeam }) {
 
             <table className="table m-0">
               <tbody>
-                {/* De API geeft decimeters en hectogram, daarom delen we door 10. */}
                 <tr>
                   <td className="text-muted">Lengte</td>
                   <td>{pokemon.height / 10} m</td>
@@ -232,7 +231,6 @@ function Detail({ favorites, addFavorite, removeFavorite, teams, addToTeam }) {
 
             <table className="table align-middle m-0">
               <tbody>
-                {/* Een stat is maximaal 255, zo rekenen we uit hoe vol de balk is. */}
                 {pokemon.stats.map((stat) => (
                   <tr key={stat.stat.name}>
                     <td className="text-muted">{statNames[stat.stat.name]}</td>

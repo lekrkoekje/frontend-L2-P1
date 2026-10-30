@@ -2,24 +2,20 @@ body {
   background-color: #f4f6f9;
 }
 
-/* Houdt de kleine Pokemon plaatjes scherp als ze groter worden. */
 img {
   image-rendering: pixelated;
 }
 
-/* HEADER */
 
 .logo {
   width: 32px;
 }
 
-/* KAARTEN */
 
 .pokemon-card:hover {
   background-color: #eef2f7;
 }
 
-/* contain laat het hele plaatje zien zonder het uit te rekken. */
 .pokemon-image {
   width: 100%;
   height: 110px;
@@ -27,20 +23,17 @@ img {
   object-fit: contain;
 }
 
-/* Zet het kruisje rechtsboven in de kaart. */
 .remove-button {
   position: absolute;
   top: 8px;
   right: 8px;
 }
 
-/* HOME */
 
 .home-pokemon {
   width: 220px;
 }
 
-/* DETAIL */
 
 .detail-image {
   width: 100%;
@@ -55,7 +48,6 @@ img {
   width: 96px;
 }
 
-/* TEAMS */
 
 .team-slot {
   height: 110px;
@@ -68,7 +60,6 @@ img {
   width: 64px;
 }
 
-/* TYPES */
 
 .type-normal { background-color: #a8a878; }
 .type-fire { background-color: #f08030; }

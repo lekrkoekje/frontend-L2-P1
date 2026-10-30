@@ -1,24 +1,23 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-// De pagina waar je teams maakt, verwijdert en Pokemon uit een team haalt.
 function Teams({ teams, addTeam, removeTeam, removeFromTeam }) {
-  // De naam die je typt voor een nieuw team.
+
   const [teamName, setTeamName] = useState('');
 
-  // Maakt een nieuw team, preventDefault zorgt dat de pagina niet opnieuw laadt.
   function handleSubmit(event) {
     event.preventDefault();
 
-    if (teamName.trim() === '') {
+    const trimmedName = teamName.trim();
+
+    if (trimmedName === '') {
       return;
     }
 
-    addTeam(teamName.trim());
+    addTeam(trimmedName);
     setTeamName('');
   }
 
-  // Bovenaan het formulier voor een nieuw team, daaronder elk team als een kaart.
   return (
     <section>
       <div className="d-flex justify-content-between align-items-center mb-3">

@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-// De homepagina, de eerste pagina die je ziet.
 function Home({ favoritesCount, teamsCount }) {
-  // De willekeurige Pokemon, eerst nog leeg (null).
+
   const [pokemon, setPokemon] = useState(null);
 
-  // Haalt een willekeurige Pokemon (nummer 1 t/m 1025) op als de pagina opent.
   useEffect(() => {
     async function fetchRandomPokemon() {
       const randomId = Math.floor(Math.random() * 1025) + 1;
@@ -20,7 +18,6 @@ function Home({ favoritesCount, teamsCount }) {
     fetchRandomPokemon();
   }, []);
 
-  // Bovenaan de welkomstkaart met de willekeurige Pokemon, daaronder 3 kaarten naar de andere pagina's.
   return (
     <section>
       <div className="card border-0 shadow-sm mb-4">

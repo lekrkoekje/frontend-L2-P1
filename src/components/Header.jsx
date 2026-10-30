@@ -3,12 +3,9 @@ import { Link } from 'react-router-dom';
 
 import Navigation from './Navigation';
 
-// De menubalk bovenaan elke pagina met het logo en de links.
 function Header() {
-  // Onthoudt of het menu op de telefoon open of dicht staat.
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // De ☰ knop zet het menu op de telefoon open of dicht, klik je op een link dan gaat het dicht.
   return (
     <nav className="navbar navbar-expand-md navbar-dark bg-primary sticky-top shadow-sm">
       <div className="container">
